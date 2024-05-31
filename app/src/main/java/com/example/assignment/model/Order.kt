@@ -1,7 +1,9 @@
 package com.example.assignment.model
 
 data class Order(
+    val orderId: Int?,
     val userId: Int?,
+    val createdAt: String?,
     val createdSuccess: Boolean?,
     val orderItems: List<OrderItem>?
 )

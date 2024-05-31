@@ -1,5 +1,8 @@
 package com.example.assignment.screen.order_screen
 
+import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -30,37 +34,80 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.example.assignment.model.Order
 import com.example.assignment.screen.HeaderContent
 import com.example.assignment.ui.theme.ColorF0
 import com.example.assignment.ui.theme.TextColor24
 import com.example.assignment.ui.theme.TextColor80
 import com.example.assignment.util.nunitosansFamily
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
+fun convertDate(dateStr: String): String {
+    // Định dạng của chuỗi ngày tháng ban đầu
+    val inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd yyyy HH:mm:ss 'GMT'Z '('zzzz')'", Locale.ENGLISH)
+
+    // Định dạng mong muốn
+    val outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+    // Phân tích chuỗi ngày tháng ban đầu thành đối tượng ZonedDateTime
+    val dateTime = ZonedDateTime.parse(dateStr, inputFormatter)
+
+    // Định dạng lại đối tượng ZonedDateTime thành chuỗi theo định dạng mong muốn
+    return dateTime.format(outputFormatter)
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OrderScreen() {
+fun OrderScreen(navController: NavHostController, orderViewModel: OrderViewModel = viewModel(
+    modelClass = OrderViewModel::class.java
+)) {
+
+    val state = orderViewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    if (state.value.orders == null) {
+        orderViewModel.getOrderByUserId(context)
+    }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .statusBarsPadding()
         .padding(20.dp)) {
         Column {
             HeaderContent(title = "My order")
-            OrderBody()
+            OrderBody(state.value.orders ?: emptyList())
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OrderBody() {
+fun OrderBody(orders : List<Order>) {
     Spacer(modifier = Modifier.size(20.dp))
     LazyColumn {
-        items(10) {
-            OrderItem()
+        items(orders.size) {
+            OrderItem(orders[it])
         }
     }
 }
 
+@SuppressLint("DefaultLocale")
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OrderItem() {
+fun OrderItem(order: Order) {
+
+    var total = 0f
+
+    order.orderItems?.forEach{
+        total += it.amount?.times(it.product?.price?.toFloat()!!) ?: 0f
+    }
 
     val amountText  = buildAnnotatedString {
         withStyle(style = SpanStyle(fontFamily = nunitosansFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = TextColor80)) {
@@ -68,7 +115,7 @@ fun OrderItem() {
         }
 
         withStyle(style = SpanStyle(fontFamily = nunitosansFamily, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextColor24)) {
-            append("03")
+            append("${order.orderItems?.size}")
         }
     }
 
@@ -78,7 +125,7 @@ fun OrderItem() {
         }
 
         withStyle(style = SpanStyle(fontFamily = nunitosansFamily, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextColor24)) {
-            append("$ 150")
+            append("$ ${String.format("%.2f", total)}")
         }
     }
 
@@ -96,13 +143,13 @@ fun OrderItem() {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Order No238562312",
+                Text(text = "Order No${order.orderId}",
                     fontSize = 16.sp,
                     fontFamily = nunitosansFamily,
                     fontWeight = FontWeight.SemiBold,
                     color = TextColor24)
 
-                Text(text = "20/03/2020",
+                Text(text = order.createdAt?.let { convertDate(it) } ?: "",
                     fontSize = 14.sp,
                     fontFamily = nunitosansFamily,
                     fontWeight = FontWeight.Normal,

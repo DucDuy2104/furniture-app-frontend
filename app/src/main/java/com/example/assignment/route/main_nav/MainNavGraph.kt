@@ -51,7 +51,7 @@ fun MainNavGraph(
         composable(
             route = GrapScreen.OrderScreen.route
         ) {
-            OrderScreen()
+            OrderScreen(navController= navController)
         }
 
     }
