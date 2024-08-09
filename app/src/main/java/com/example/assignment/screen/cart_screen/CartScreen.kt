@@ -41,6 +41,7 @@ import coil.compose.AsyncImage
 import com.example.assignment.R
 import com.example.assignment.component.LoadingDialog
 import com.example.assignment.model.Cart
+import com.example.assignment.model.DeleteCart
 import com.example.assignment.model.UpdateCart
 import com.example.assignment.screen.HeaderContent
 import com.example.assignment.ui.theme.ColorF0
@@ -74,6 +75,11 @@ fun CartScreen(
         cartViewModel.createOrder(context)
     }
 
+
+    fun deleteCart(cartId: Int) {
+        cartViewModel.deleteCart(cartId, context)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -91,7 +97,8 @@ fun CartScreen(
                     .weight(1f)
                     .padding(bottom = 10.dp),
                 carts ?: emptyList(),
-                ::updateCart
+                ::updateCart,
+                ::deleteCart
             )
             CartFooter(
                 modifier = Modifier
@@ -109,7 +116,7 @@ fun CartScreen(
 }
 
 @Composable
-fun CartItem(cart: Cart, updateCart: (Int, String) -> Unit) {
+fun CartItem(cart: Cart, updateCart: (Int, String) -> Unit, deleteCart: (Int) -> Unit) {
     Spacer(modifier = Modifier.size(10.dp))
     Box(modifier = Modifier.fillMaxWidth()) {
 
@@ -209,6 +216,9 @@ fun CartItem(cart: Cart, updateCart: (Int, String) -> Unit) {
                         painter = painterResource(id = R.drawable.delete),
                         contentDescription = "delete",
                         modifier = Modifier.size(24.dp)
+                            .clickable {
+                                cart.cartId?.let { deleteCart(it) }
+                            }
                     )
                 }
             }
@@ -328,12 +338,13 @@ fun CartFooter(
 
 @Composable
 fun CartBody(modifier: Modifier, carts: List<Cart>,
-             updateCart: (Int , String) -> Unit) {
+             updateCart: (Int , String) -> Unit,
+             deleteCart: (Int) -> Unit) {
     LazyColumn(
         modifier = modifier
     ) {
         items(carts.size) {
-            CartItem(carts[it], updateCart)
+            CartItem(carts[it], updateCart, deleteCart)
         }
     }
 }

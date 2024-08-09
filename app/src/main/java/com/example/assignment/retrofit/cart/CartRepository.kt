@@ -32,4 +32,15 @@ class CartRepository {
             onComplete(isSuccess)
         }
     }
+
+    suspend fun deleteCart(query: GrapQuery, onComplete: (Cart) ->Unit) {
+        val response = cartApi.deleteCart(query)
+
+        val cart = response.body()?.data?.deleteCart
+
+
+        if (cart != null) {
+            onComplete(cart)
+        }
+    }
 }

@@ -37,3 +37,13 @@ data class UpdateCartResponse(
 data class  UpdateCart(
     val updateCart: Boolean
 )
+
+
+data class DeleteCartResponse (
+    val data:DeleteCart
+    )
+
+
+data class DeleteCart  (
+    val deleteCart: Cart?
+)

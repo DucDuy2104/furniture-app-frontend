@@ -1,6 +1,8 @@
 package com.example.assignment.retrofit.cart
 
 import com.example.assignment.model.CreateCartResponse
+import com.example.assignment.model.DeleteCart
+import com.example.assignment.model.DeleteCartResponse
 import com.example.assignment.model.GetCartsByUserResponse
 import com.example.assignment.model.UpdateCartResponse
 import com.example.assignment.retrofit.category.GrapQuery
@@ -19,4 +21,8 @@ interface CartApi {
 
     @POST("graphql")
     suspend fun updateCart(@Body query: GrapQuery) : Response<UpdateCartResponse>
+
+
+    @POST("graphql")
+    suspend fun deleteCart(@Body query: GrapQuery) : Response<DeleteCartResponse>
 }

@@ -9,7 +9,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
-    val ipV4 = "192.168.1.33"
+    const val ipV4 = "192.168.1.80"
     private val BASE_URL = "http://$ipV4:3000/"
 
     val retrofit: Retrofit by lazy {

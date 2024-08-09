@@ -111,4 +111,30 @@ class CartViewModel : ViewModel() {
             }
         }
     }
+
+
+    fun deleteCart(cartId: Int, context: Context) {
+        val query = """
+            mutation {
+              deleteCart(deleteCartInput: {cartId: ${cartId}}) {
+                cartId
+              }
+            }
+        """.trimIndent()
+
+        viewModelScope.launch {
+            _state.update {
+                it.copy(isLoading = true)
+            }
+
+            cartRepository.deleteCart(GrapQuery(query)) { cart->
+                if (cart.cartId == cartId) {
+                    getCarts(context)
+                    Toast.makeText(context, "Delete success!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Delete failure!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 }
